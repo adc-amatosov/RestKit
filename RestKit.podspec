@@ -39,6 +39,7 @@ EOS
     os.dependency       'RestKit/Support'
     os.dependency       'RKValueTransformers', '~> 1.1.0'
     os.dependency       'ISO8601DateFormatterValueTransformer', '~> 0.6.1'
+    os.dependency       'CocoaLumberjack'
   end
 
   s.subspec 'Network' do |ns|
