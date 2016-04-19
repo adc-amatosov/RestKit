@@ -71,10 +71,13 @@ static RKSourceToDesinationKeyTransformationBlock defaultSourceToDestinationKeyT
     [inverseMapping copyPropertiesFromMapping:mapping];
     // We want to serialize `nil` values
     inverseMapping.assignsDefaultValueForMissingAttributes = YES;
+    inverseMapping.valueTransformer = mapping.valueTransformer;
     
     for (RKAttributeMapping *attributeMapping in mapping.attributeMappings) {
         if (predicate && !predicate(attributeMapping)) continue;
-        [inverseMapping addPropertyMapping:[RKAttributeMapping attributeMappingFromKeyPath:attributeMapping.destinationKeyPath toKeyPath:attributeMapping.sourceKeyPath]];
+        RKAttributeMapping *inverseAttributeMapping = [RKAttributeMapping attributeMappingFromKeyPath:attributeMapping.destinationKeyPath toKeyPath:attributeMapping.sourceKeyPath];
+        inverseAttributeMapping.valueTransformer = attributeMapping.valueTransformer;
+        [inverseMapping addPropertyMapping:inverseAttributeMapping];
     }
     
     for (RKRelationshipMapping *relationshipMapping in mapping.relationshipMappings) {
@@ -85,7 +88,11 @@ static RKSourceToDesinationKeyTransformationBlock defaultSourceToDestinationKeyT
         }
         if (predicate && !predicate(relationshipMapping)) continue;
         RKMapping *inverseRelationshipMapping = [self invertMapping:mapping withPredicate:predicate];
-        if (inverseRelationshipMapping) [inverseMapping addPropertyMapping:[RKRelationshipMapping relationshipMappingFromKeyPath:relationshipMapping.destinationKeyPath toKeyPath:relationshipMapping.sourceKeyPath withMapping:inverseRelationshipMapping]];
+        if (inverseRelationshipMapping) {
+            RKRelationshipMapping *inverseRelMapping = [RKRelationshipMapping relationshipMappingFromKeyPath:relationshipMapping.destinationKeyPath toKeyPath:relationshipMapping.sourceKeyPath withMapping:inverseRelationshipMapping];
+            inverseRelMapping.valueTransformer = mapping.valueTransformer;
+            [inverseMapping addPropertyMapping:inverseRelMapping];
+        }
     }
     
     return inverseMapping;
